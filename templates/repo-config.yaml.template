@@ -1,0 +1,22 @@
+schema_version: "1.0.0"
+repository:
+  name: "{{REPO_NAME}}"
+  type: "{{REPO_TYPE}}"
+  language: "{{PRIMARY_LANGUAGE}}"
+  cde_compliant: true
+  mss_version: "1.0.0"
+
+standards:
+  ci_workflow: "{{CI_WORKFLOW}}"
+  license: "MIT"
+  code_style: "{{CODE_STYLE}}"
+  documentation: "README.md + inline comments"
+
+build:
+  primary_command: "{{BUILD_COMMAND}}"
+  test_command: "{{TEST_COMMAND}}"
+
+quality:
+  linting: {{LINTING}}
+  security_scan: {{SECURITY_SCAN}}
+  coverage_target: {{COVERAGE_TARGET}}

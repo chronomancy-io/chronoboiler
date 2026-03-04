@@ -1,0 +1,60 @@
+---
+# Python Language Configuration
+# For use with CI/CD template placeholders
+
+language:
+  name: Python
+  version: "3.11"
+  file_extensions:
+    - ".py"
+
+# GitHub Actions setup
+github_actions:
+  setup_action: actions/setup-python@v5
+  setup_version_key: python-version
+  cache_path: ~/.cache/pip
+  lock_file: requirements.txt
+
+# Commands
+commands:
+  install: pip install -r requirements.txt
+  lint: ruff check .
+  format_check: ruff format --check .
+  test: pytest --cov=src --cov-report=xml
+  coverage: pytest --cov=src --cov-report=html
+  bench: pytest --benchmark-only --benchmark-json=benchmark.json
+  build: python -m build
+
+# Coverage
+coverage:
+  file: coverage.xml
+  threshold: 80
+
+# Benchmark
+benchmark:
+  tool: pytest
+  output_file: benchmark.json
+
+# Artifacts
+artifacts:
+  path: dist/
+
+# Example repo-config values
+example:
+  project_name: my-python-project
+  description: A Python project with CDE optimization
+  cde_role: pipeline
+  complexity_profile: batch-processing
+  complexity_proven: true
+  benchmarks_enforced: true
+
+# Special notes
+notes: |
+  Python projects typically use:
+  - pyproject.toml for modern packaging
+  - ruff for fast linting and formatting
+  - pytest for testing with pytest-cov for coverage
+  - mypy for type checking (optional but recommended)
+
+  For editable installs: pip install -e ".[dev]"
+  For production: pip install .

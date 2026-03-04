@@ -1,0 +1,60 @@
+---
+# Java Language Configuration
+# For use with CI/CD template placeholders
+
+language:
+  name: Java
+  version: "17"
+  file_extensions:
+    - ".java"
+
+# GitHub Actions setup
+github_actions:
+  setup_action: actions/setup-java@v4
+  setup_version_key: java-version
+  cache_path: ~/.gradle/caches
+  lock_file: build.gradle
+
+# Commands
+commands:
+  install: ./gradlew dependencies --no-daemon
+  lint: ./gradlew checkstyleMain checkstyleTest --no-daemon
+  format_check: ./gradlew spotlessCheck --no-daemon
+  test: ./gradlew test --no-daemon
+  coverage: ./gradlew jacocoTestReport --no-daemon
+  bench: ./gradlew jmh --no-daemon
+  build: ./gradlew build --no-daemon
+
+# Coverage
+coverage:
+  file: build/reports/jacoco/test/jacocoTestReport.xml
+  threshold: 80
+
+# Benchmark
+benchmark:
+  tool: JMH
+  output_file: build/reports/jmh/human.txt
+
+# Artifacts
+artifacts:
+  path: build/libs/
+
+# Example repo-config values
+example:
+  project_name: my-java-project
+  description: A Java project with CDE optimization
+  cde_role: simulation
+  complexity_profile: hpc
+  complexity_proven: true
+  benchmarks_enforced: true
+
+# Special notes
+notes: |
+  Java projects typically use:
+  - Gradle or Maven for build management
+  - Checkstyle + Spotless for code quality
+  - JaCoCo for test coverage
+  - JMH for microbenchmarks
+
+  For Gradle projects: ./gradlew build
+  For Maven projects: mvn clean compile

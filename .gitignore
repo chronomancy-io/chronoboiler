@@ -1,0 +1,62 @@
+# Universal ignores (all repos)
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*.log
+.env
+.env.local
+*.tmp
+
+# Build artifacts
+dist/
+build/
+target/
+out/
+
+# Dependencies
+node_modules/
+__pycache__/
+vendor/
+*.o
+*.pyc
+
+# Testing
+coverage/
+.nyc_output/
+.pytest_cache/
+.coverage
+
+# IDE
+.sublime-*
+*.sublime-*
+
+# Python-specific
+*.egg-info/
+.venv/
+env/
+venv/
+
+# Node.js-specific
+npm-debug.log
+yarn-error.log
+
+# Go-specific
+*.exe
+
+# Rust-specific
+Cargo.lock
+
+# 6502 Assembly-specific
+*.prg
+*.o65
+
+# Game engine-specific
+Binaries/
+Intermediate/
+Saved/
+
+# Chronoboiler-specific
+.rendered/
+

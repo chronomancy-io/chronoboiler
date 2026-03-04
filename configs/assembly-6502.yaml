@@ -1,0 +1,57 @@
+---
+# 6502 Assembly Language Configuration
+# For use with CI/CD template placeholders
+
+language:
+  name: 6502 Assembly
+  version: ca65
+  file_extensions:
+    - ".asm"
+    - ".s"
+    - ".inc"
+
+# GitHub Actions setup
+# Note: 6502 toolchain requires custom setup
+github_actions:
+  setup_action: actions/checkout@v4
+  setup_version_key: ""
+  cache_path: ~/.cache/cc65
+  lock_file: ""
+
+# Commands
+# Assumes cc65 toolchain with Makefile-based build
+commands:
+  install: |
+    sudo apt-get update
+    sudo apt-get install -y cc65
+  lint: make lint || echo "No lint target defined"
+  format_check: echo "Format check not applicable for assembly"
+  test: make test
+  coverage: echo "Coverage not applicable for assembly"
+  bench: make benchmark
+  build: make clean && make
+
+# Coverage
+coverage:
+  file: ""
+  threshold: 0
+
+# Benchmark
+benchmark:
+  tool: customSmallerIsBetter
+  output_file: benchmark.json
+
+# Artifacts
+artifacts:
+  path: |
+    *.prg
+    *.d64
+
+# Example repo-config values
+example:
+  project_name: my-6502-project
+  description: "DurexForth: SAT-solving Forth OS for Commodore 64"
+  cde_role: embedded
+  complexity_profile: embedded
+  complexity_proven: false
+  benchmarks_enforced: true

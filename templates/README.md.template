@@ -1,0 +1,45 @@
+# {{PROJECT_NAME}}
+
+{{ONE_SENTENCE_DESCRIPTION}}
+
+## Overview
+
+{{OVERVIEW_PARAGRAPH_1}}
+
+{{OVERVIEW_PARAGRAPH_2}}
+
+## CDE Implementation
+
+### Dimensions
+
+{{CDE_DIMENSIONS}}
+
+### Query Workload
+
+{{QUERY_WORKLOAD}}
+
+### Minimal Sufficient Statistic
+
+{{MSS_RATIONALE}}
+
+## Installation
+
+{{INSTALLATION_STEPS}}
+
+## Usage
+
+{{USAGE_STEPS}}
+
+## Architecture
+
+{{ARCHITECTURE_SUMMARY}}
+
+## Development
+
+Build: `{{BUILD_COMMAND}}`
+
+Test: `{{TEST_COMMAND}}`
+
+## License
+
+MIT

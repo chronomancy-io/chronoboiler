@@ -1,0 +1,50 @@
+---
+# TypeScript Language Configuration
+# For use with CI/CD template placeholders
+
+language:
+  name: TypeScript
+  version: "20"
+  file_extensions:
+    - ".ts"
+    - ".tsx"
+
+# GitHub Actions setup
+github_actions:
+  setup_action: actions/setup-node@v4
+  setup_version_key: node-version
+  cache_path: ~/.npm
+  lock_file: package-lock.json
+
+# Commands
+commands:
+  install: npm ci
+  lint: npm run lint
+  format_check: npm run format:check
+  test: npm test -- --coverage
+  coverage: npm run coverage
+  bench: npm run bench
+  build: npm run build
+
+# Coverage
+coverage:
+  file: coverage/lcov.info
+  threshold: 80
+
+# Benchmark
+benchmark:
+  tool: benchmarkjs
+  output_file: benchmark-results.json
+
+# Artifacts
+artifacts:
+  path: dist/
+
+# Example repo-config values
+example:
+  project_name: my-typescript-project
+  description: High-performance boid simulation with CDE optimization
+  cde_role: simulation
+  complexity_profile: hpc
+  complexity_proven: true
+  benchmarks_enforced: true

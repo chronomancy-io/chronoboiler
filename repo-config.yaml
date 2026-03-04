@@ -1,0 +1,23 @@
+---
+schema_version: "1.0.0"
+repository:
+  name: "chronoboiler"
+  type: "tool"
+  language: "Multi"
+  cde_compliant: true
+  mss_version: "1.0.0"
+
+standards:
+  ci_workflow: ".github/workflows/ci.yml"
+  license: "Apache-2.0"
+  code_style: "mixed (see .editorconfig)"
+  documentation: "README.md + inline comments"
+
+build:
+  primary_command: "echo 'No build - templates'"
+  test_command: "./scripts/validate-repo.sh ."
+
+quality:
+  linting: true
+  security_scan: false
+  coverage_target: null

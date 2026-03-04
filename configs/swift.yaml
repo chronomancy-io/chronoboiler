@@ -1,0 +1,67 @@
+---
+# Swift Language Configuration
+# For use with CI/CD template placeholders
+
+language:
+  name: Swift
+  version: "5.9"
+  file_extensions:
+    - ".swift"
+
+# GitHub Actions setup
+github_actions:
+  setup_action: swift-actions/setup-swift@v1
+  setup_version_key: swift-version
+  cache_path: |
+    .build/
+    ~/.swiftpm/
+  lock_file: Package.resolved
+
+# Commands (Xcode project)
+commands:
+  install: echo "Dependencies managed by Xcode"
+  lint: swiftlint
+  format_check: swiftformat --lint .
+  test: >-
+    xcodebuild -project *.xcodeproj -scheme $SCHEME test
+    CODE_SIGNING_ALLOWED=NO
+  coverage: echo "Use Xcode coverage tools"
+  bench: echo "N/A for UI applications"
+  build: >-
+    xcodebuild -project *.xcodeproj -scheme $SCHEME build
+    CODE_SIGNING_ALLOWED=NO
+
+# Coverage
+coverage:
+  file: ""
+  threshold: 0
+
+# Benchmark
+benchmark:
+  tool: ""
+  output_file: ""
+
+# Artifacts
+artifacts:
+  path: build/
+
+# Example repo-config values
+example:
+  project_name: my-swift-project
+  description: A macOS/iOS application
+  cde_role: utility
+  complexity_profile: application
+  complexity_proven: false
+  benchmarks_enforced: false
+
+# Special notes
+notes: |
+  Swift macOS apps typically require:
+  - Xcode 14.0+ for development
+  - Apple Developer certificate for code signing
+  - macOS runners for CI/CD
+
+  For menu bar apps like ChronoQuit:
+  - Automation permissions require Developer ID signing
+  - Hardened runtime must be enabled
+  - Notarization recommended for distribution

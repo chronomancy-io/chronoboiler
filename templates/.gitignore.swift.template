@@ -1,0 +1,7 @@
+.build/
+.swiftpm/
+*.xcworkspace
+!default.xcworkspace
+dist/
+.DS_Store
+*.swp

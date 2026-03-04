@@ -1,0 +1,253 @@
+---
+name: CI
+
+'on':
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint-scripts:
+    name: Lint Shell Scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Run shellcheck
+        run: |
+          find scripts -name "*.sh" -exec shellcheck {} \;
+
+  validate-yaml:
+    name: Validate YAML Files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install yamllint
+        run: pip install yamllint
+
+      - name: Lint YAML files
+        run: |
+          yamllint -s \
+            repo-config.yaml \
+            configs/*.yaml
+
+  validate-templates:
+    name: Validate Template Structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check template files exist
+        run: |
+          TEMPLATES=(
+            "templates/README.template.md"
+            "templates/ARCHITECTURE.template.md"
+            "templates/PERFORMANCE.template.md"
+            "templates/CONTRIBUTING.template.md"
+            "templates/repo-config.template.yaml"
+            "templates/github/workflows/ci.template.yml"
+            "templates/github/SOLID_CHECKLIST.md"
+            "templates/github/pull_request_template.md"
+          )
+
+          MISSING=0
+          for template in "${TEMPLATES[@]}"; do
+            if [[ ! -f "$template" ]]; then
+              echo "::error::Missing template: $template"
+              MISSING=$((MISSING + 1))
+            else
+              echo "::notice::Found: $template"
+            fi
+          done
+
+          if [[ $MISSING -gt 0 ]]; then
+            exit 1
+          fi
+
+      - name: Check placeholder format
+        run: |
+          # Verify all templates use double-brace placeholder format
+          # Skip workflow templates as they contain GHA expressions
+          ERROR=0
+          TEMPLATE_FILES=(
+            templates/*.md
+            templates/*.yaml
+          )
+          for file in "${TEMPLATE_FILES[@]}"; do
+            if [[ -f "$file" ]]; then
+              # Check for old {PLACEHOLDER} format (single braces)
+              # Pattern matches {UPPER_CASE} but not shell vars or double braces
+              if grep -P '(?<!\$)(?<!\{)\{[A-Z_]+\}(?!\})' "$file"; then
+                echo "::error::Single-brace placeholder in $file"
+                ERROR=1
+              fi
+            fi
+          done
+
+          if [[ $ERROR -eq 1 ]]; then
+            exit 1
+          fi
+          echo "::notice::All placeholders use correct format"
+
+  validate-configs:
+    name: Validate Language Configs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install yq
+        run: |
+          YQ_URL="https://github.com/mikefarah/yq/releases"
+          YQ_URL="${YQ_URL}/latest/download/yq_linux_amd64"
+          sudo wget -qO /usr/local/bin/yq "${YQ_URL}"
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Validate config structure
+        run: |
+          CONFIGS=(
+            "configs/python.yaml"
+            "configs/typescript.yaml"
+            "configs/rust.yaml"
+            "configs/swift.yaml"
+            "configs/forth.yaml"
+            "configs/assembly-6502.yaml"
+            "configs/unrealscript.yaml"
+          )
+
+          ERROR=0
+          for config in "${CONFIGS[@]}"; do
+            echo "Validating: $config"
+
+            # Check required fields
+            if ! yq eval '.language.name' "$config" > /dev/null 2>&1; then
+              echo "::error::Missing language.name in $config"
+              ERROR=1
+            fi
+
+            FIELD='.github_actions.setup_action'
+            if ! yq eval "${FIELD}" "$config" > /dev/null 2>&1; then
+              echo "::error::Missing setup_action in $config"
+              ERROR=1
+            fi
+
+            if ! yq eval '.commands.build' "$config" > /dev/null 2>&1; then
+              echo "::error::Missing commands.build in $config"
+              ERROR=1
+            fi
+          done
+
+          if [[ $ERROR -eq 1 ]]; then
+            exit 1
+          fi
+          echo "::notice::All configs valid"
+
+  self-validate:
+    name: Self-Validation
+    runs-on: ubuntu-latest
+    needs:
+      - lint-scripts
+      - validate-yaml
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install yq
+        run: |
+          YQ_URL="https://github.com/mikefarah/yq/releases"
+          YQ_URL="${YQ_URL}/latest/download/yq_linux_amd64"
+          sudo wget -qO /usr/local/bin/yq "${YQ_URL}"
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Run validation script on self
+        run: |
+          chmod +x scripts/validate-repo.sh
+          ./scripts/validate-repo.sh .
+
+  test-template-rendering:
+    name: Test Template Rendering
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create test directory
+        run: mkdir -p /tmp/test-repo
+
+      - name: Test placeholder replacement
+        run: |
+          # Copy a template
+          cp templates/README.template.md /tmp/test-repo/README.md
+
+          # Replace placeholders
+          sed -i \
+            -e 's|{{PROJECT_NAME}}|test-project|g' \
+            -e 's|{{ONE_SENTENCE_DESCRIPTION}}|A test project|g' \
+            -e 's|{{LANGUAGE}}|python|g' \
+            -e 's|{{CHRONOBOILER_VERSION}}|1.0.0|g' \
+            /tmp/test-repo/README.md
+
+          # Verify replacements worked
+          if grep -q "{{PROJECT_NAME}}" /tmp/test-repo/README.md; then
+            echo "::error::Placeholder replacement failed"
+            exit 1
+          fi
+
+          if ! grep -q "test-project" /tmp/test-repo/README.md; then
+            echo "::error::Expected content not found"
+            exit 1
+          fi
+
+          echo "::notice::Template rendering works correctly"
+
+  summary:
+    name: CI Summary
+    runs-on: ubuntu-latest
+    needs:
+      - lint-scripts
+      - validate-yaml
+      - validate-templates
+      - validate-configs
+      - self-validate
+      - test-template-rendering
+    if: always()
+    steps:
+      - name: Check all jobs
+        env:
+          LINT_RESULT: ${{ needs.lint-scripts.result }}
+          YAML_RESULT: ${{ needs.validate-yaml.result }}
+          TMPL_RESULT: ${{ needs.validate-templates.result }}
+          CONF_RESULT: ${{ needs.validate-configs.result }}
+          SELF_RESULT: ${{ needs.self-validate.result }}
+          REND_RESULT: ${{ needs.test-template-rendering.result }}
+        run: |
+          if [[ "${LINT_RESULT}" != "success" ]]; then
+            echo "::error::Shell script linting failed"
+            exit 1
+          fi
+          if [[ "${YAML_RESULT}" != "success" ]]; then
+            echo "::error::YAML validation failed"
+            exit 1
+          fi
+          if [[ "${TMPL_RESULT}" != "success" ]]; then
+            echo "::error::Template validation failed"
+            exit 1
+          fi
+          if [[ "${CONF_RESULT}" != "success" ]]; then
+            echo "::error::Config validation failed"
+            exit 1
+          fi
+          if [[ "${SELF_RESULT}" != "success" ]]; then
+            echo "::error::Self-validation failed"
+            exit 1
+          fi
+          if [[ "${REND_RESULT}" != "success" ]]; then
+            echo "::error::Template rendering test failed"
+            exit 1
+          fi
+          echo "::notice::All CI checks passed"

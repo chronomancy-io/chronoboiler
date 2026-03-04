@@ -1,0 +1,8 @@
+*.o
+*.prg
+*.d64
+*.d81
+vice.log
+*.bin
+.DS_Store
+*.swp

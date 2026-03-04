@@ -1,0 +1,55 @@
+---
+# Forth Language Configuration
+# For use with CI/CD template placeholders
+
+language:
+  name: Forth
+  version: "gforth 0.7"
+  file_extensions:
+    - ".fs"
+    - ".fth"
+    - ".4th"
+
+# GitHub Actions setup
+github_actions:
+  setup_action: actions/checkout@v4
+  setup_version_key: ""
+  cache_path: ""
+  lock_file: ""
+
+# Commands
+commands:
+  install: |
+    sudo apt-get update
+    sudo apt-get install -y gforth
+  lint: echo "No standard linter for Forth"
+  format_check: echo "No standard formatter for Forth"
+  test: make test
+  coverage: echo "Coverage not applicable for Forth"
+  bench: make benchmark
+  build: make
+
+# Coverage
+coverage:
+  file: ""
+  threshold: 0
+
+# Benchmark
+benchmark:
+  tool: customSmallerIsBetter
+  output_file: benchmark.json
+
+# Artifacts
+artifacts:
+  path: |
+    *.fs
+    *.bin
+
+# Example repo-config values
+example:
+  project_name: my-forth-project
+  description: A Forth project
+  cde_role: embedded
+  complexity_profile: embedded
+  complexity_proven: false
+  benchmarks_enforced: true

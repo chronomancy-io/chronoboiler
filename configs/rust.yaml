@@ -1,0 +1,57 @@
+---
+# Rust Language Configuration
+# For use with CI/CD template placeholders
+
+language:
+  name: Rust
+  version: stable
+  file_extensions:
+    - ".rs"
+
+# GitHub Actions setup
+github_actions:
+  setup_action: dtolnay/rust-toolchain@stable
+  setup_version_key: toolchain
+  cache_path: |
+    ~/.cargo/bin/
+    ~/.cargo/registry/index/
+    ~/.cargo/registry/cache/
+    ~/.cargo/git/db/
+    target/
+  lock_file: Cargo.lock
+
+# Commands
+commands:
+  install: cargo fetch
+  lint: cargo clippy -- -D warnings
+  format_check: cargo fmt --check
+  test: cargo test --lib
+  coverage: cargo llvm-cov --lcov --output-path lcov.info
+  bench: >-
+    cargo bench --bench benchmarks -- --output-format bencher |
+    tee benchmark.txt
+  build: cargo build --release
+
+# Coverage
+coverage:
+  file: lcov.info
+  threshold: 80
+
+# Benchmark
+benchmark:
+  tool: cargo
+  output_file: benchmark.txt
+
+# Artifacts
+artifacts:
+  path: target/release/
+
+# Example repo-config values
+example:
+  project_name: my-rust-project
+  description: >-
+    High-performance rendering engine with dimensional optimization
+  cde_role: engine
+  complexity_profile: hpc
+  complexity_proven: true
+  benchmarks_enforced: true

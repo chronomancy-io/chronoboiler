@@ -1,0 +1,63 @@
+---
+# UnrealScript Language Configuration
+# For use with CI/CD template placeholders
+
+language:
+  name: UnrealScript
+  version: XCOM 2 SDK
+  file_extensions:
+    - ".uc"
+
+# GitHub Actions setup
+# Note: UnrealScript requires XCOM 2 SDK and specific Windows environment
+github_actions:
+  setup_action: actions/checkout@v4
+  setup_version_key: ""
+  cache_path: ""
+  lock_file: ""
+
+# Commands
+# Note: Many commands require Windows and XCOM 2 SDK
+commands:
+  install: echo "Requires XCOM 2 SDK installation"
+  lint: echo "No standard linter available"
+  format_check: echo "No standard formatter available"
+  test: make test-mission || echo "Requires game runtime"
+  coverage: echo "Coverage not applicable for UnrealScript"
+  bench: make profile || echo "Requires game runtime"
+  build: make mod
+
+# Coverage
+coverage:
+  file: ""
+  threshold: 0
+
+# Benchmark
+benchmark:
+  tool: customSmallerIsBetter
+  output_file: profile-results.json
+
+# Artifacts
+artifacts:
+  path: |
+    ModName/
+    *.x2proj
+
+# Example repo-config values
+example:
+  project_name: my-unrealscript-project
+  description: An XCOM 2 mod project
+  cde_role: game-mod
+  complexity_profile: game-engine
+  complexity_proven: false
+  benchmarks_enforced: false
+
+# Special notes
+notes: |
+  UnrealScript development typically requires:
+  - Windows environment
+  - XCOM 2 SDK installed via Steam
+  - ModBuddy IDE (optional but recommended)
+
+  CI/CD for UnrealScript mods is limited due to platform constraints.
+  Consider using self-hosted Windows runners for automated testing.

@@ -1,0 +1,64 @@
+---
+# Repository Semantic Configuration
+# Maps this repo to standardization framework
+
+repository:
+  name: "{{PROJECT_NAME}}"
+  description: "{{PROJECT_DESCRIPTION}}"
+  language: "{{LANGUAGE}}"
+  language_version: "{{LANGUAGE_VERSION}}"
+
+# Build and test commands
+semantics:
+  build_cmd: "{{BUILD_COMMAND}}"
+  test_cmd: "{{TEST_COMMAND}}"
+  complexity_cmd: "{{COMPLEXITY_COMMAND}}"
+  bench_cmd: "{{BENCH_COMMAND}}"
+
+# Role in portfolio
+# Options: theory, embedded, game-mod, simulation, engine, infrastructure
+cde_role: "{{CDE_ROLE}}"
+
+# Complexity profile
+# Options: theory, embedded, game-engine, hpc, distributed, infrastructure
+complexity_profile: "{{COMPLEXITY_PROFILE}}"
+
+# Standardization status
+standardization:
+  source: the-chronomancer/chronoboiler
+  version: "{{CHRONOBOILER_VERSION}}"
+
+  structure:
+    - README.md
+    - ARCHITECTURE.md
+    - PERFORMANCE.md
+    - CONTRIBUTING.md
+
+  validation:
+    solid_principles: true
+    complexity_proven: "{{COMPLEXITY_PROVEN}}"
+    benchmarks_enforced: "{{BENCHMARKS_ENFORCED}}"
+
+  automation:
+    ci_cd_enabled: true
+    lint_enforced: true
+    test_enforced: true
+    bench_enforced: "{{BENCHMARKS_ENFORCED}}"
+
+  coherence:
+    editorconfig: true
+    gitignore_aligned: true
+    attributes_aligned: true
+
+# GitHub Actions configuration
+github_actions:
+  workflows:
+    - name: CI/CD
+      file: .github/workflows/ci.yml
+      triggers:
+        - push
+        - pull_request
+    - name: Benchmark
+      file: .github/workflows/benchmark.yml
+      triggers:
+        - push
