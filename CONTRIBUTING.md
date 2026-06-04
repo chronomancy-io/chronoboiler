@@ -151,9 +151,8 @@ else
 fi
 ```
 
-1. Test against multiple repos
-2. Update usage.md if behavior changes
-3. Submit PR
+1. Test against multiple repos (`./scripts/validate-all.sh`)
+2. Submit PR
 
 ## Submission Process
 
@@ -199,15 +198,15 @@ fix(validate): handle missing yq gracefully
 
 ## Version Bumping
 
-When your changes warrant a version bump:
-
-1. Update `CHANGELOG.md` with changes under `[Unreleased]`
-2. Maintainers will move changes to a version number on release
+When your changes warrant a version bump, note the change in the PR description
+and bump the `version` referenced in `repo-config.yaml` /
+`templates/repo-config.template.yaml`. (There is no `CHANGELOG.md` in this repo
+at present.)
 
 ## Questions?
 
 - See [ARCHITECTURE.md](./ARCHITECTURE.md) for system design
-- See [docs/usage.md](./docs/usage.md) for usage details
+- See [README.md](./README.md) for usage
 - Open an issue for clarification
 
 ---

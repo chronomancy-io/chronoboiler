@@ -7,15 +7,16 @@ repository:
   cde_compliant: true
   mss_version: "1.0.0"
 
+# Build and test commands (consumed by validate-repo.sh SEMANTICS check)
+semantics:
+  build_cmd: "echo 'No build - templates'"
+  test_cmd: "./scripts/validate-repo.sh ."
+
 standards:
   ci_workflow: ".github/workflows/ci.yml"
   license: "Apache-2.0"
   code_style: "mixed (see .editorconfig)"
   documentation: "README.md + inline comments"
-
-build:
-  primary_command: "echo 'No build - templates'"
-  test_command: "./scripts/validate-repo.sh ."
 
 quality:
   linting: true

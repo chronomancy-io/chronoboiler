@@ -8,37 +8,41 @@ Standardization templates for repository portfolios.
 ![CDE v1.0.0](https://img.shields.io/badge/CDE-v1.0.0-green)
 ![MSS v1.0.0](https://img.shields.io/badge/MSS-v1.0.0-orange)
 
-Encodes CDE dimensions (template type, option set, file graph, parameter map) to generate repeatable, MSS-compliant scaffolding across multiple languages.
+Zero-dependency bash scaffolding plus per-language YAML configs and shared
+templates, used to give the chrono-* repositories a consistent structure.
 
 ## Background
 
 Chronoboiler provides templates, validation scripts, and CI/CD workflows for maintaining consistent structure across repositories that use different languages and tools.
 
-### CDE Implementation
+### CDE Framing (Definition)
 
-#### Dimensions
+Chronoboiler is described in terms of four conceptual dimensions. These are a
+**descriptive framing** over the bash scripts and YAML configs, not a built or
+queryable index. No index is constructed; `sync-templates.sh` performs `sed`
+placeholder substitution and `validate-repo.sh` performs file-existence,
+YAML-field, and line-count checks.
 
-- **Template type**: language/stack selection.
+- **Template type**: language/stack selection (chooses a `configs/*.yaml`).
 - **Option set**: toggles for CI, docs, licensing, and code style.
-- **File graph**: mapping from template files to destination paths.
-- **Parameter map**: placeholders → concrete values.
+- **File graph**: mapping from template files to destination paths (the
+  manifest in `sync-templates.sh`).
+- **Parameter map**: `{{PLACEHOLDER}}` tokens → concrete values.
 
-#### Query Workload
+#### What the tooling actually does (Definition)
 
-ChronoBoiler is optimized for:
+- "Given a config and a target directory, copy the templates and substitute
+  `{{PLACEHOLDER}}` values" — implemented by `scripts/sync-templates.sh`.
+- "Given a repo, check it for the required files, a valid `repo-config.yaml`,
+  a CI workflow, and minimum doc length" — implemented by
+  `scripts/validate-repo.sh`.
 
-- "Given a template and options, instantiate a new repository skeleton."
-- "Given a repo, map back to the template and parameterization that produced it."
-- "Generate repeatable, MSS-compliant scaffolding across multiple languages."
-
-#### Minimal Sufficient Statistic
-
-Template type, option set, file graph, and parameter map are:
-
-- The smallest set that can fully reconstruct any instantiated repo, and
-- Sufficient to reason about its structure and standards.
-
-This CDE is an MSS for template-driven repository generation.
+> **Assumption, not Guarantee.** The four dimensions are an informal framing.
+> Chronoboiler does not store or query a reverse index, so "map a repo back to
+> the template and parameters that produced it" is not implemented and is not a
+> guarantee. The claim that these four fields are a *minimal sufficient
+> statistic* that can reconstruct an instantiated repo is unproven in this repo
+> and is treated here as framing, not a proven property.
 
 ## Install
 
@@ -51,7 +55,8 @@ git clone https://github.com/chronomancy-io/chronoboiler.git
 ### Apply to a New Repository
 
 ```bash
-./chronoboiler/scripts/sync-templates.sh /path/to/your-repo rust
+# Run from the chronoboiler repo root
+./scripts/sync-templates.sh /path/to/your-repo rust
 ```
 
 ### Validate a Repository
@@ -59,6 +64,11 @@ git clone https://github.com/chronomancy-io/chronoboiler.git
 ```bash
 ./scripts/validate-repo.sh /path/to/repo
 ```
+
+Chronoboiler passes its own validator. Measured on the audit machine
+(AMD Ryzen 7 5800X, bash 5.2.37), `./scripts/validate-repo.sh .` exits `0`
+both with and without `yq` installed. See [PERFORMANCE.md](PERFORMANCE.md) for
+the measured timings and an important note about the no-`yq` path.
 
 ## Templates
 
@@ -73,44 +83,64 @@ git clone https://github.com/chronomancy-io/chronoboiler.git
 
 ## Language Configurations
 
-| Config | Language | Example Use |
-|--------|----------|-------------|
-| `configs/rust.yaml` | Rust | Game engines, performance-critical |
-| `configs/typescript.yaml` | TypeScript | Web applications, simulations |
-| `configs/swift.yaml` | Swift | macOS/iOS applications |
-| `configs/assembly-6502.yaml` | 6502 Assembly | Embedded, retro computing |
-| `configs/forth.yaml` | Forth | Embedded, stack-based languages |
-| `configs/python.yaml` | Python | General purpose, scripting |
-| `configs/unrealscript.yaml` | UnrealScript | Game modding |
+Eight configs ship in `configs/`. The `language.name` column below is read
+directly from each file; the example role is the config's own `example.cde_role`.
+
+| Config | Language (`language.name`) | `example.cde_role` |
+|--------|----------------------------|--------------------|
+| `configs/rust.yaml` | Rust | engine |
+| `configs/typescript.yaml` | TypeScript | simulation |
+| `configs/swift.yaml` | Swift | utility |
+| `configs/assembly-6502.yaml` | 6502 Assembly | embedded |
+| `configs/forth.yaml` | Forth | embedded |
+| `configs/python.yaml` | Python | pipeline |
+| `configs/java.yaml` | Java | simulation |
+| `configs/unrealscript.yaml` | UnrealScript | game-mod |
 
 ## Scripts
 
-| Script | Purpose |
-|--------|---------|
-| `scripts/validate-repo.sh` | Check repository compliance |
-| `scripts/validate-all.sh` | Check multiple repositories |
-| `scripts/sync-templates.sh` | Deploy templates to a target repo |
+| Script | Shell | Purpose |
+|--------|-------|---------|
+| `scripts/validate-repo.sh` | bash | Check a single repository's compliance |
+| `scripts/validate-all.sh` | bash | Validate every sibling repo that has a `repo-config.yaml` |
+| `scripts/sync-templates.sh` | bash | Deploy templates to a target repo |
+| `scripts/lint-all-repos.sh` | zsh | Run language linters across the chrono-* repos (optional; needs zsh + linters) |
 
 ## Standardized Repositories
 
-| Repository | Language | Role |
-|------------|----------|------|
-| chronoengine | Rust | Rendering engine |
-| chronoboids | TypeScript | Boid simulation |
-| chronoforth | 6502 Assembly | Forth for C64 |
-| chronosat | Forth | SAT verification |
-| chronoquit | Swift | macOS utility |
-| chronoscribe | Python | OCR text restoration |
+The chrono-* portfolio is the intended consumer of these templates. Languages
+below are read from each sibling repo's own `repo-config.yaml` where one was
+present at audit time; entries without a sibling repo are marked.
+
+| Repository | Language (from its `repo-config.yaml`) |
+|------------|----------------------------------------|
+| chronoengine | Rust |
+| chronoforth | Forth |
+| chronosat | Forth |
+| chronoquit | Swift |
+| chronoscribe | Python |
+
+> **Unknown / aspirational.** As of this audit, none of these repos declares
+> `standardization.source: chronoboiler` in its `repo-config.yaml`, so the link
+> is by convention only, not recorded in the configs. A `chronoboids`
+> (TypeScript boid simulation) repo is referenced elsewhere in the framing but
+> was not present alongside this repo at audit time.
 
 ## Versioning
 
-Repositories reference chronoboiler in their `repo-config.yaml`:
+The template configuration includes a `standardization` block intended to let a
+consuming repo record where its scaffolding came from:
 
 ```yaml
 standardization:
-  source: chronomancy-io/chronoboiler
+  source: the-chronomancer/chronoboiler
   version: v1.0.0
 ```
+
+> **Assumption.** This is the convention encoded in
+> `templates/repo-config.template.yaml`. At audit time the chrono-* sibling
+> repos did not actually carry this block, so it documents intended usage rather
+> than current state.
 
 ## Architecture
 
