@@ -2,9 +2,12 @@
 
 ## System Overview
 
-Chronoboiler is a template repository that provides standardization infrastructure
-for the chrono-* portfolio. It operates as a source of truth rather than an
-executable system.
+Chronoboiler is a template repository that provides standardization
+infrastructure for the chrono-* portfolio: shared documentation/config
+templates, per-language YAML configs, and three bash scripts (plus one optional
+zsh linter) that copy templates into a target repo and validate a repo against
+the expected structure. It is data (templates + configs) plus thin bash tooling,
+not a long-running service.
 
 ### Component Diagram
 
@@ -16,10 +19,9 @@ graph TB
         configs["configs/<br/>*.yaml language bindings"]
     end
 
-    subgraph targets["Target Repositories"]
+    subgraph targets["Target Repositories (chrono-* portfolio)"]
         chronoengine["chronoengine<br/>Rust"]
-        chronoboids["chronoboids<br/>TypeScript"]
-        chronoforth["chronoforth<br/>6502 Assembly"]
+        chronoforth["chronoforth<br/>Forth"]
         chronosat["chronosat<br/>Forth"]
         chronoquit["chronoquit<br/>Swift"]
         chronoscribe["chronoscribe<br/>Python"]
@@ -68,14 +70,21 @@ Key scripts:
 **Outputs:** YAML configuration consumed by scripts
 **Dependencies:** None
 
-| Config | Language | Target Repo |
-|--------|----------|-------------|
-| rust.yaml | Rust | chronoengine |
-| typescript.yaml | TypeScript | chronoboids |
-| assembly-6502.yaml | 6502 Assembly | chronoforth |
-| forth.yaml | Forth | chronosat |
-| swift.yaml | Swift | chronoquit |
-| python.yaml | Python | chronoscribe |
+All eight files currently in `configs/`. The language is each config's
+`language.name`; the intended consumer is illustrative, not recorded in the
+configs (see README for the caveat that no sibling repo declares chronoboiler as
+its source).
+
+| Config | Language (`language.name`) | Illustrative consumer |
+|--------|----------------------------|-----------------------|
+| rust.yaml | Rust | chronoengine (Rust) |
+| typescript.yaml | TypeScript | (TypeScript repo) |
+| assembly-6502.yaml | 6502 Assembly | retro / embedded |
+| forth.yaml | Forth | chronosat, chronoforth (both Forth) |
+| swift.yaml | Swift | chronoquit (Swift) |
+| python.yaml | Python | chronoscribe (Python) |
+| java.yaml | Java | (Java repo) |
+| unrealscript.yaml | UnrealScript | game mod |
 
 ### Component 4: CI/CD Workflows
 
@@ -118,12 +127,15 @@ graph TD
         sync["sync-templates.sh"]
     end
 
-    subgraph configs["configs/"]
+    subgraph configs["configs/ (8 files)"]
         rust["rust.yaml"]
         typescript["typescript.yaml"]
         swift["swift.yaml"]
         forth["forth.yaml"]
         asm["assembly-6502.yaml"]
+        python["python.yaml"]
+        java["java.yaml"]
+        unrealscript["unrealscript.yaml"]
     end
 
     validateall --> validate
@@ -197,7 +209,7 @@ repository/
 ├── PERFORMANCE.md         # From template
 ├── CONTRIBUTING.md        # From template
 ├── repo-config.yaml       # From template
-├── LICENSE                # MIT
+├── LICENSE                # Per the target repo (chronoboiler itself is Apache-2.0)
 ├── .editorconfig          # Universal
 ├── .gitignore             # Merged
 ├── .gitattributes         # Universal
